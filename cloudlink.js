@@ -400,6 +400,7 @@
       "0.2.": 4,
       "0.1.9": 3,
       "0.1.8": 2,
+      "0.1.0-golang": 2,
       "0.1.7": 1,
       "0.1.5": 0,
       "S2.2": 0, // 0.1.5
@@ -1914,13 +1915,6 @@
         return;
       }
 
-      // Prevent running if a room link is in progress.
-      if (clVars.rooms.isAttemptingLink) {
-        console.warn("[CloudLink] Currently linking to rooms! Please wait!");
-        return;
-      }
-
-      clVars.rooms.isAttemptingLink = true;
       sendMessage({ cmd: "link", val: args.ROOMS, listener: "link" });
     }
 

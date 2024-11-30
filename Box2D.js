@@ -1,13 +1,13 @@
-// Name: Boxed Plysics
+// Name: WorldSpritesPlysics
 // ID: P7BoxPhys
 // Description: Implements the Box2D physics engine, adding joints, springs, sliders, and more.
-// By: pooiod7 <https://scratch.mit.edu/users/pooiod7/>
+// By: pooiod7 and TheShovel
 // Original: Griffpatch
 // License: zlib
 
 /* This extension was originally based off of the Box2D Physics extension
-for ScratchX by Griffpatch, but has since deviated to have more features,
-while keeping general compatability. (made with box2D js es6) */
+for ScratchX by Griffpatch, but has since deviated to have more features.
+(made with box2D js es6) */
 
 (function(Scratch) {
   'use strict';
@@ -72,7 +72,7 @@ while keeping general compatability. (made with box2D js es6) */
     getInfo() {
       return {
         id: 'P7BoxPhys',
-        name: physdebugmode || wipblocks ? 'Boxed Physics (debug)' : 'Boxed Physics',
+        name: physdebugmode || wipblocks ? 'Physics (debug)' : 'Physics',
         color1: physdebugmode || wipblocks ? "#4b4a60" : "#2cb0c0",
         color2: physdebugmode || wipblocks ? "#383747" : "#4eb88a",
         menuIconURI: menuIconURI,
@@ -388,7 +388,18 @@ while keeping general compatability. (made with box2D js es6) */
             blockType: Scratch.BlockType.REPORTER,
             text: 'All objects',
           },
+          {
+            opcode: 'getBodyObject',
+            blockType: Scratch.BlockType.REPORTER,
+            text: 'Get object [NAME]',
+            arguments: {
+              NAME: {
+                type: Scratch.ArgumentType.STRING
+              }
+            },
+          },
           { blockType: Scratch.BlockType.LABEL, text: "Define joints" }, // ---- Define joints -----
+
           {
             opcode: 'defineSpring',
             blockType: Scratch.BlockType.COMMAND,
@@ -734,7 +745,7 @@ while keeping general compatability. (made with box2D js es6) */
           BodyTypePK: ['dynamic', 'static'],
           BodyTypePK2: ['dynamic', 'static', 'any'],
           bodyAttr: ['damping', 'rotational damping'],
-          bodyAttrRead: ['x', 'y', 'Xvel', 'Yvel', 'Dvel', 'direction', 'awake','w','h'],
+          bodyAttrRead: ['x', 'y', 'Xvel', 'Yvel', 'Dvel', 'direction', 'awake','w','h','touching'],
           ForceType: ['Impulse', 'World Impulse'],
           AngForceType: ['Impulse'],
           JointType: ['Rotating', 'Spring', 'Weld', 'Slider', 'Mouse'],
@@ -1155,7 +1166,20 @@ while keeping general compatability. (made with box2D js es6) */
 
       return touchingObjectNames;
     }
+    getBodyObject(args){
+      var body = bodies[args.NAME];
+      return JSON.stringify({
+        "x":Math.round(body.GetPosition().x * b2Dzoom),
+        "y":Math.round(body.GetPosition().y * b2Dzoom),
+        "r":Math.round(90 - (body.GetAngle() / toRad)),
+        "xv":Math.round(body.GetLinearVelocity().x),
+        "yv":Math.round(body.GetLinearVelocity().y),
+        "dv":Math.round(body.GetAngularVelocity()),
+        "w":vm.runtime.variables[args.NAME+"_W"],
+        "h":vm.runtime.variables[args.NAME+"_H"]
 
+      })
+    }
     getBodyAttr(args) {
       var body = bodies[args.NAME];
       if (!body) return '';
@@ -1183,7 +1207,7 @@ while keeping general compatability. (made with box2D js es6) */
           console.log("The force applied to the object by other objects is " + force + " N"); // Print the result
           return force;
 
-        //case 'touching': return JSON.stringify(this.getTouchingObjectNames(body));
+        case 'touching': return JSON.stringify(this.getTouchingObjectNames(body));
       }
       return '';
     }

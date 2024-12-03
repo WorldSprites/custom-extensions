@@ -1172,8 +1172,8 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
         "x":Math.round(body.GetPosition().x * b2Dzoom),
         "y":Math.round(body.GetPosition().y * b2Dzoom),
         "r":Math.round(90 - (body.GetAngle() / toRad)),
-        "xv":Math.round(body.GetLinearVelocity().x),
-        "yv":Math.round(body.GetLinearVelocity().y),
+        "xv":body.GetLinearVelocity().x,
+        "yv":body.GetLinearVelocity().y,
         "dv":Math.round(body.GetAngularVelocity()),
         "w":vm.runtime.variables[args.NAME+"_W"],
         "h":vm.runtime.variables[args.NAME+"_H"]

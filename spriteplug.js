@@ -10,6 +10,7 @@ let inRoom = false;
 let hasUsername = false;
 let localUser = "{}";
 let privateData = "{}";
+let gotNewPublicDirectData = false;
 
 function handleMessage(data) {
   lastData = JSON.parse(data);
@@ -23,6 +24,7 @@ function handleMessage(data) {
           case "directPrivate":
             privateData = lastData.data;
           case "direct":
+            gotNewPublicDirectData = true;
             directData = lastData.data;
           case "privVar":
             privateVariables[lastData.data.var] = lastData.data.val;
@@ -35,6 +37,7 @@ function handleMessage(data) {
       case "info":
         switch (lastData.originType) {
           case "info":
+            hasUsername = true;
             localUser = JSON.stringify(lastData.data);
         }
       case "validate":
@@ -42,7 +45,6 @@ function handleMessage(data) {
           case "room":
             inRoom = true;
           case "username":
-            hasUsername = true;
             socket.send(
               JSON.stringify({
                 command: {
@@ -67,10 +69,11 @@ function resetClient() {
   directData = "{}";
   publicVariables = {};
   privateVariables = {};
-  inRoom = true;
-  hasUsername = true;
+  inRoom = false;
+  hasUsername = false;
   localUser = "{}";
   privateData = "{}";
+  gotNewPublicDirectData = false;
 }
 
 async function newClient(url) {
@@ -185,6 +188,12 @@ class spriteplug {
           disableMonitor: true,
         },
         {
+          opcode: "gotNewPublicDirectData",
+          blockType: Scratch.BlockType.BOOLEAN,
+          text: "Got new public direct data?",
+          disableMonitor: true,
+        },
+        {
           opcode: "getDirectDataPrivate",
           blockType: Scratch.BlockType.REPORTER,
           text: "Direct data private",
@@ -245,6 +254,14 @@ class spriteplug {
         },
       ],
     };
+  }
+  gotNewPublicDirectData() {
+    if (gotNewPublicDirectData) {
+      gotNewPublicDirectData = false;
+      return true;
+    } else {
+      return false;
+    }
   }
   getPrivVariable(args) {
     if (privateVariables[args.var] != undefined) {

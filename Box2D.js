@@ -673,6 +673,29 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
             },
           },
           {
+            opcode:"raycastonepart",
+            blockType: Scratch.BlockType.REPORTER,
+            text: "Raycast normal between x [x1] y [y1] and x [x2] y [y2]",
+            arguments: {
+              x1: {
+                type: Scratch.ArgumentType.NUMBER,
+                defaultValue: "0"
+              },
+              y1: {
+                type: Scratch.ArgumentType.NUMBER,
+                defaultValue: "0"
+              },
+              x2: {
+                type: Scratch.ArgumentType.NUMBER,
+                defaultValue: "0"
+              },
+              y2: {
+                type: Scratch.ArgumentType.NUMBER,
+                defaultValue: "0"
+              },
+            },
+          },
+          {
             opcode: "distanceOfPoint",
             blockType: Scratch.BlockType.REPORTER,
             text: "Distance between x [a1] y [a2] and x [b1] y [b2]",
@@ -852,7 +875,22 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
 
       bodyDef.type = b2Body.b2_dynamicBody;
     }
-
+    raycastonepart(args){
+      let point1 = {};
+      let point2 = {};
+      point1.x = args.x1;
+      point1.y = args.y1;
+      point2.x = args.x2;
+      point2.y = args.y2;
+      let temp = b2Dworld.RayCastOne(point1, point2);
+      console.log(temp);
+      if (temp){
+        return Math.abs(temp);
+      } else
+      {
+        return 1
+      }
+    }
     rotatePoint(args) {
       var radians = args.ANGLE * Math.PI / 180;
       var cos = Math.cos(radians);
@@ -1176,7 +1214,8 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
         "yv":body.GetLinearVelocity().y,
         "dv":Math.round(body.GetAngularVelocity()),
         "w":vm.runtime.variables[args.NAME+"_W"],
-        "h":vm.runtime.variables[args.NAME+"_H"]
+        "h":vm.runtime.variables[args.NAME+"_H"],
+        "s":vm.runtime.variables[args.NAME+"_S"]
 
       })
     }
@@ -6784,20 +6823,19 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
 
         function RayCastOneWrapper(fixture, point, normal, fraction) {
           if (fraction === undefined) fraction = 0;
-          result = fixture;
+          result = point;
           return fraction;
         }
         __this.RayCast(RayCastOneWrapper, point1, point2);
         return result;
       }
-
       RayCastAll(point1, point2) {
         const __this = this;
         const result = new Vector();
 
         function RayCastAllWrapper(fixture, point, normal, fraction) {
           if (fraction === undefined) fraction = 0;
-          result[result.length] = fixture;
+          result[result.length] = normal;
           return 1;
         }
         __this.RayCast(RayCastAllWrapper, point1, point2);
@@ -7181,7 +7219,6 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
         }
       }
     }
-
     Box2D.Dynamics.b2World = b2World;
 
     class b2Contact {

@@ -1206,7 +1206,7 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
     }
     getBodyObject(args){
       var body = bodies[args.NAME];
-      return JSON.stringify({
+      let tempObject = {
         "x":Math.round(body.GetPosition().x * b2Dzoom),
         "y":Math.round(body.GetPosition().y * b2Dzoom),
         "r":Math.round(90 - (body.GetAngle() / toRad)),
@@ -1216,8 +1216,14 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
         "w":vm.runtime.variables[args.NAME+"_W"],
         "h":vm.runtime.variables[args.NAME+"_H"],
         "s":vm.runtime.variables[args.NAME+"_S"]
-
-      })
+      }
+      if (vm.runtime.variables[args.NAME+"_S"] == "anim"){
+        tempObject.af = vm.runtime.variables[args.NAME + "_AF"];
+        tempObject.a = vm.runtime.variables[args.NAME + "_A"];
+        tempObject.d = vm.runtime.variables[args.NAME + "_D"];
+        tempObject.aid = vm.runtime.variables[args.NAME + "_AID"];
+      }
+      return JSON.stringify(tempObject)
     }
     getBodyAttr(args) {
       var body = bodies[args.NAME];

@@ -1185,24 +1185,7 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
     }
 
     getTouchingObjectNames(obj) {
-      var contacts = obj.GetContactList();
-      var touchingObjectNames = [];
-
-      while (contacts) {
-        if (contacts.contact.IsTouching()) {
-          var otherFixture = contacts.contact.GetFixtureA() === obj ? contacts.contact.GetFixtureB() : contacts.contact.GetFixtureA();
-          var otherBody = otherFixture.GetBody();
-          var otherUserData = otherBody.GetUserData();
-
-          if (otherUserData && otherUserData.name) {
-            touchingObjectNames.push(otherUserData.name);
-          }
-        }
-
-        contacts = contacts.next;
-      }
-
-      return touchingObjectNames;
+        return obj.GetContactList() != null;
     }
     getBodyObject(args){
       var body = bodies[args.NAME];

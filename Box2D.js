@@ -1205,6 +1205,7 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
         tempObject.a = vm.runtime.variables[args.NAME + "_A"];
         tempObject.d = vm.runtime.variables[args.NAME + "_D"];
         tempObject.aid = vm.runtime.variables[args.NAME + "_AID"];
+        tempObject.ai = Math.round(vm.runtime.variables[args.NAME + "_AI"]);
       }
       return JSON.stringify(tempObject)
     }

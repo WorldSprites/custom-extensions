@@ -11,6 +11,10 @@ let hasUsername = false;
 let localUser = "{}";
 let privateData = "{}";
 let gotNewPublicDirectData = false;
+let privateDataSender = "";
+let directDataSender = "";
+let publicVariablesSender = {};
+let privateVariablesSender = {};
 
 function handleMessage(data) {
   lastData = JSON.parse(data);
@@ -23,13 +27,17 @@ function handleMessage(data) {
         switch (lastData.command.meta) {
           case "directPrivate":
             privateData = lastData.data;
+            privateDataSender = lastData.sender;
           case "direct":
             gotNewPublicDirectData = true;
             directData = lastData.data;
+            directDataSender = lastData.sender;
           case "privVar":
             privateVariables[lastData.data.var] = lastData.data.val;
+            privateVariablesSender[lastData.data.var] = lastData.sender;
           case "pubVar":
             publicVariables[lastData.data.var] = lastData.data.val;
+            publicVariablesSender[lastData.data.var] = lastData.sender;
         }
     }
   } else {
@@ -74,6 +82,10 @@ function resetClient() {
   localUser = "{}";
   privateData = "{}";
   gotNewPublicDirectData = false;
+  privateDataSender = "";
+  directDataSender = "";
+  publicVariablesSender = {};
+  privateVariablesSender = {};
 }
 
 async function newClient(url) {
@@ -188,6 +200,12 @@ class spriteplug {
           disableMonitor: true,
         },
         {
+          opcode: "getDirectDataSender",
+          blockType: Scratch.BlockType.REPORTER,
+          text: "Direct data sender",
+          disableMonitor: true,
+        },
+        {
           opcode: "gotNewPublicDirectData",
           blockType: Scratch.BlockType.BOOLEAN,
           text: "Got new public direct data?",
@@ -200,6 +218,12 @@ class spriteplug {
           disableMonitor: true,
         },
         {
+          opcode: "getDirectDataPrivateSender",
+          blockType: Scratch.BlockType.REPORTER,
+          text: "Direct data private sender",
+          disableMonitor: true,
+        },
+        {
           opcode: "getPubVariable",
           blockType: Scratch.BlockType.REPORTER,
           text: "Public variable [var]",
@@ -208,9 +232,25 @@ class spriteplug {
           },
         },
         {
+          opcode: "getPubVariableSender",
+          blockType: Scratch.BlockType.REPORTER,
+          text: "Public variable [var] sender",
+          arguments: {
+            var: { type: Scratch.ArgumentType.STRING },
+          },
+        },
+        {
           opcode: "getPrivVariable",
           blockType: Scratch.BlockType.REPORTER,
           text: "Private variable [var]",
+          arguments: {
+            var: { type: Scratch.ArgumentType.STRING },
+          },
+        },
+        {
+          opcode: "getPrivVariableSender",
+          blockType: Scratch.BlockType.REPORTER,
+          text: "Private variable [var] sender",
           arguments: {
             var: { type: Scratch.ArgumentType.STRING },
           },
@@ -270,6 +310,13 @@ class spriteplug {
       return "";
     }
   }
+  getPrivVariableSender(args) {
+    if (privateVariablesSender[args.var] != undefined) {
+      return privateVariablesSender[args.var];
+    } else {
+      return "";
+    }
+  }
   inRoom() {
     return inRoom;
   }
@@ -282,6 +329,13 @@ class spriteplug {
   getPubVariable(args) {
     if (publicVariables[args.var] != undefined) {
       return publicVariables[args.var];
+    } else {
+      return "";
+    }
+  }
+  getPubVariableSender(args) {
+    if (publicVariablesSender[args.var] != undefined) {
+      return publicVariablesSender[args.var];
     } else {
       return "";
     }
@@ -315,8 +369,14 @@ class spriteplug {
   getDirectData() {
     return directData;
   }
+  getDirectDataSender() {
+    return directDataSender;
+  }
   getDirectDataPrivate() {
     return privateData;
+  }
+  getDirectDataPrivateSender() {
+    return privateDataSender;
   }
   getUsernames() {
     return userList;

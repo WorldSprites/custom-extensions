@@ -1198,7 +1198,8 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
         "dv":Math.round(body.GetAngularVelocity()),
         "w":vm.runtime.variables[args.NAME+"_W"],
         "h":vm.runtime.variables[args.NAME+"_H"],
-        "s":vm.runtime.variables[args.NAME+"_S"]
+        "s":vm.runtime.variables[args.NAME+"_S"],
+        "c":vm.runtime.variables[args.NAME+"_C"].toString()
       }
       if (vm.runtime.variables[args.NAME+"_S"] == "anim"){
         tempObject.af = vm.runtime.variables[args.NAME + "_AF"];
@@ -1206,6 +1207,7 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
         tempObject.d = vm.runtime.variables[args.NAME + "_D"];
         tempObject.aid = vm.runtime.variables[args.NAME + "_AID"];
         tempObject.ai = Math.round(vm.runtime.variables[args.NAME + "_AI"]);
+        tempObject.feet = vm.runtime.variables[args.NAME + "_FEET"];
       }
       return JSON.stringify(tempObject)
     }

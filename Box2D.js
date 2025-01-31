@@ -1,8 +1,8 @@
 // Name: WorldSpritesPlysics
 // ID: P7BoxPhys
 // Description: Implements the Box2D physics engine, adding joints, springs, sliders, and more.
-// By: pooiod7 and TheShovel
-// Original: Griffpatch
+// By: TheShovel
+// Original: Griffpatch and pooiod7
 // License: zlib
 
 /* This extension was originally based off of the Box2D Physics extension
@@ -15,6 +15,8 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
   if (!Scratch.extensions.unsandboxed) {
     throw new Error('Boxed Physics can\'t run in the sandbox');
   }
+
+  let noCollide = {};
 
   var b2Vec2, b2AABB, b2BodyDef, b2Body, b2FixtureDef, b2Fixture, b2World, b2MassData, b2PolygonShape, b2CircleShape, b2DebugDraw, b2MouseJointDef;
   var b2Dworld, fixDef; var mousePVec, selectedBody, prb2djaxisX, prb2djaxisY, prb2djl, prb2dju;
@@ -185,6 +187,28 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
             opcode: 'destroyBodys',
             blockType: Scratch.BlockType.COMMAND,
             text: 'Destroy every object',
+          },
+          {
+            opcode: 'disableCollider',
+            blockType: Scratch.BlockType.COMMAND,
+            text: 'Disable collisions for [NAME]',
+            arguments: {
+              NAME: {
+                type: Scratch.ArgumentType.STRING,
+                defaultValue: 'Object',
+              },
+            },
+          },
+          {
+            opcode: 'enableCollider',
+            blockType: Scratch.BlockType.COMMAND,
+            text: 'Enable collisions for [NAME]',
+            arguments: {
+              NAME: {
+                type: Scratch.ArgumentType.STRING,
+                defaultValue: 'Object',
+              },
+            },
           },
           {
             opcode: 'createNoCollideSet',
@@ -768,7 +792,7 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
           BodyTypePK: ['dynamic', 'static'],
           BodyTypePK2: ['dynamic', 'static', 'any'],
           bodyAttr: ['damping', 'rotational damping'],
-          bodyAttrRead: ['x', 'y', 'Xvel', 'Yvel', 'Dvel', 'direction', 'awake','w','h','touching'],
+          bodyAttrRead: ['x', 'y', 'Xvel', 'Yvel', 'Dvel', 'direction', 'awake','w','h','touching','canNotCollide'],
           ForceType: ['Impulse', 'World Impulse'],
           AngForceType: ['Impulse'],
           JointType: ['Rotating', 'Spring', 'Weld', 'Slider', 'Mouse'],
@@ -965,6 +989,26 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
       fixDef.friction = fric;		   // 0.5
       fixDef.restitution = rest;	// 0.2
     }
+    enableCollider(args) {
+      var body = bodies[args.NAME];
+      if (!body) return '';
+      if(noCollide[args.NAME] == 1){
+        noCollide[args.NAME] = 0;
+        var desiredPosition = new b2Vec2(body.GetPosition().x-999999999, body.GetPosition().y-999999999);
+        body.SetPosition(desiredPosition);
+        body.SetAwake(true)
+      }
+    }
+    disableCollider(args) {
+      var body = bodies[args.NAME];
+      if (!body) return '';
+      if (noCollide[args.NAME] == 0) {
+        noCollide[args.NAME] = 1;
+        var desiredPosition = new b2Vec2(body.GetPosition().x+999999999, body.GetPosition().y+999999999);
+        body.SetPosition(desiredPosition);
+        body.SetAwake(true)
+      }
+    }
 
     defineCircle(args) {
       fixDef.shape = new b2CircleShape;
@@ -1067,17 +1111,18 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
         return false;
       }
     }
-
+    getNoCollide(args) {
+      return noCollide;
+    }
     placeBody(args) {
       var id = args.NAME;
-
+      noCollide[id] = 0;
       if (bodies[id]) {
         b2Dworld.DestroyBody(bodies[id]);
       }
 
       fixDef.filter.categoryBits = bodyCategoryBits;
       fixDef.filter.maskBits = bodyMaskBits;
-
       bodyDef.position.x = args.X / b2Dzoom;
       bodyDef.position.y = args.Y / b2Dzoom;
       bodyDef.angle = (90 - args.DIR) * toRad;
@@ -1189,18 +1234,22 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
     }
     getBodyObject(args){
       var body = bodies[args.NAME];
-      let tempObject = {
-        "x":Math.round(body.GetPosition().x * b2Dzoom),
-        "y":Math.round(body.GetPosition().y * b2Dzoom),
-        "r":Math.round(90 - (body.GetAngle() / toRad)),
-        "xv":body.GetLinearVelocity().x,
-        "yv":body.GetLinearVelocity().y,
-        "dv":Math.round(body.GetAngularVelocity()),
-        "w":vm.runtime.variables[args.NAME+"_W"],
-        "h":vm.runtime.variables[args.NAME+"_H"],
-        "s":vm.runtime.variables[args.NAME+"_S"],
-        "c":vm.runtime.variables[args.NAME+"_C"].toString()
+      let tempObject = {};
+      if(noCollide[args.NAME] == 1){
+        tempObject.x = Math.round((body.GetPosition().x - 999999999) * b2Dzoom);
+        tempObject.y = Math.round((body.GetPosition().y - 999999999) * b2Dzoom);
+      } else {
+        tempObject.x = Math.round(body.GetPosition().x * b2Dzoom);
+        tempObject.y = Math.round(body.GetPosition().y * b2Dzoom);
       }
+      tempObject.r = Math.round(90 - (body.GetAngle() / toRad));
+      tempObject.xv = body.GetLinearVelocity().x;
+      tempObject.yv = body.GetLinearVelocity().y;
+      tempObject.dv = Math.round(body.GetAngularVelocity());
+      tempObject.w = vm.runtime.variables[args.NAME + "_W"];
+      tempObject.h = vm.runtime.variables[args.NAME + "_H"];
+      tempObject.s = vm.runtime.variables[args.NAME + "_S"];
+      tempObject.c = vm.runtime.variables[args.NAME + "_C"].toString();
       if (vm.runtime.variables[args.NAME+"_S"] == "anim"){
         tempObject.af = vm.runtime.variables[args.NAME + "_AF"];
         tempObject.a = vm.runtime.variables[args.NAME + "_A"];
@@ -1222,7 +1271,7 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
         case 'Yvel': return body.GetLinearVelocity().y;
         case 'Dvel': return body.GetAngularVelocity();
         case 'awake': return body.IsAwake() ? 1 : 0;
-
+        case 'canNotCollide': return noCollide[args.NAME];
         case 'Tension':
           // Assume that body is a b2Body object that represents the object
           var force = 0; // Initialize the force to 0

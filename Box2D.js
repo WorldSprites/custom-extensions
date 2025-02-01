@@ -1249,6 +1249,7 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
       tempObject.w = vm.runtime.variables[args.NAME + "_W"];
       tempObject.h = vm.runtime.variables[args.NAME + "_H"];
       tempObject.s = vm.runtime.variables[args.NAME + "_S"];
+      tempObject.de = vm.runtime.variables[args.NAME + "_DE"];
       tempObject.c = vm.runtime.variables[args.NAME + "_C"].toString();
       if (vm.runtime.variables[args.NAME+"_S"] == "anim"){
         tempObject.af = vm.runtime.variables[args.NAME + "_AF"];
@@ -1264,8 +1265,8 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
       var body = bodies[args.NAME];
       if (!body) return '';
       switch (args.BODYATTRREAD) {
-        case 'x': return body.GetPosition().x * b2Dzoom;
-        case 'y': return body.GetPosition().y * b2Dzoom;
+        case 'x': if (noCollide[args.NAME] == 1) { return Math.round((body.GetPosition().x - 999999999) * b2Dzoom); } else { return Math.round(body.GetPosition().x * b2Dzoom); };
+        case 'y': if (noCollide[args.NAME] == 1) { return Math.round((body.GetPosition().y - 999999999) * b2Dzoom); } else { return Math.round(body.GetPosition().y * b2Dzoom); };
         case 'direction': return 90 - (body.GetAngle() / toRad);
         case 'Xvel': return body.GetLinearVelocity().x;
         case 'Yvel': return body.GetLinearVelocity().y;

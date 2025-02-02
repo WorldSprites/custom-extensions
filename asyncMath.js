@@ -9,6 +9,7 @@ let isTW = false;
 
 // This check is for TurboWarp compatibility
 if (vm.runtime.variables == undefined) {
+  console.log("asyncMath: In TW compat mode");
   isTW = true;
   vm.runtime.variables = {};
 }
@@ -100,6 +101,11 @@ class threadMath {
             },
           },
         },
+        {
+          opcode: "removeall",
+          blockType: Scratch.BlockType.COMMAND,
+          text: "Remove all threads",
+        },
         "---",
         {
           opcode: "setFrameRate",
@@ -120,6 +126,12 @@ class threadMath {
       ],
     };
   }
+  removeall() {
+    mathList = {};
+    mathResults = {};
+    tasks = [];
+    taskLength = 0;
+  }
   gettasks() {
     return JSON.stringify(tasks);
   }
@@ -138,21 +150,21 @@ class threadMath {
       // I am sorry for writing this. I had to do it this way for readability
       // You are not supposed to update these often anyway
       if (isTW) {
-        tempEq = tempEq.replace(
+        tempEq = tempEq.replaceAll(
           "var[",
           "vm.runtime.ext_lmsTempVars2.runtimeVariables[",
         );
       } else {
-        tempEq = tempEq.replace("var[", "vm.runtime.variables[");
+        tempEq = tempEq.replaceAll("var[", "vm.runtime.variables[");
       }
-      tempEq = tempEq.replace("abs(", "Math.abs(");
-      tempEq = tempEq.replace("cos(", "Math.cos(");
-      tempEq = tempEq.replace("sin(", "Math.sin(");
-      tempEq = tempEq.replace("max(", "Math.max(");
-      tempEq = tempEq.replace("min(", "Math.min(");
-      tempEq = tempEq.replace("floor(", "Math.floor(");
-      tempEq = tempEq.replace("sqrt(", "Math.sqrt(");
-
+      tempEq = tempEq.replaceAll("abs(", "Math.abs(");
+      tempEq = tempEq.replaceAll("cos(", "Math.cos(");
+      tempEq = tempEq.replaceAll("sin(", "Math.sin(");
+      tempEq = tempEq.replaceAll("max(", "Math.max(");
+      tempEq = tempEq.replaceAll("min(", "Math.min(");
+      tempEq = tempEq.replaceAll("floor(", "Math.floor(");
+      tempEq = tempEq.replaceAll("sqrt(", "Math.sqrt(");
+      console.log(args.ID + ":" + tempEq);
       mathList[args.ID] = tempEq;
       if (typeof eval(mathList[args.ID]) != "number") {
         console.log(mathList[args.ID]);

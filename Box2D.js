@@ -415,10 +415,13 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
           {
             opcode: 'getBodyObject',
             blockType: Scratch.BlockType.REPORTER,
-            text: 'Get object [NAME]',
+            text: 'Get object [NAME] with meta? [META]',
             arguments: {
               NAME: {
                 type: Scratch.ArgumentType.STRING
+              },
+              META: {
+                type: Scratch.ArgumentType.BOOLEAN
               }
             },
           },
@@ -1243,21 +1246,28 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
         tempObject.y = Math.round(body.GetPosition().y * b2Dzoom);
       }
       tempObject.r = Math.round(90 - (body.GetAngle() / toRad));
-      tempObject.xv = body.GetLinearVelocity().x;
-      tempObject.yv = body.GetLinearVelocity().y;
-      tempObject.dv = Math.round(body.GetAngularVelocity());
-      tempObject.w = vm.runtime.variables[args.NAME + "_W"];
-      tempObject.h = vm.runtime.variables[args.NAME + "_H"];
-      tempObject.s = vm.runtime.variables[args.NAME + "_S"];
-      tempObject.de = vm.runtime.variables[args.NAME + "_DE"];
-      tempObject.c = vm.runtime.variables[args.NAME + "_C"].toString();
+      if (args.META == true) {
+        tempObject.m = true;
+        tempObject.w = vm.runtime.variables[args.NAME + "_W"];
+        tempObject.h = vm.runtime.variables[args.NAME + "_H"];
+        tempObject.s = vm.runtime.variables[args.NAME + "_S"];
+        tempObject.c = vm.runtime.variables[args.NAME + "_C"].toString();
+        tempObject.de = vm.runtime.variables[args.NAME + "_DE"];
+      }
       if (vm.runtime.variables[args.NAME+"_S"] == "anim"){
-        tempObject.af = vm.runtime.variables[args.NAME + "_AF"];
-        tempObject.a = vm.runtime.variables[args.NAME + "_A"];
-        tempObject.d = vm.runtime.variables[args.NAME + "_D"];
-        tempObject.aid = vm.runtime.variables[args.NAME + "_AID"];
+        tempObject.xv = body.GetLinearVelocity().x;
+        tempObject.yv = body.GetLinearVelocity().y;
+        tempObject.dv = Math.round(body.GetAngularVelocity());
         tempObject.ai = Math.round(vm.runtime.variables[args.NAME + "_AI"]);
-        tempObject.feet = vm.runtime.variables[args.NAME + "_FEET"];
+        if(vm.runtime.variables[args.NAME+"_AF"] == "player"){
+          tempObject.feet = vm.runtime.variables[args.NAME + "_FEET"];
+        }
+        tempObject.d = vm.runtime.variables[args.NAME + "_D"];
+        tempObject.a = vm.runtime.variables[args.NAME + "_A"];
+        if (args.META == true) {
+          tempObject.af = vm.runtime.variables[args.NAME + "_AF"];
+          tempObject.aid = vm.runtime.variables[args.NAME + "_AID"];
+        }
       }
       return JSON.stringify(tempObject)
     }

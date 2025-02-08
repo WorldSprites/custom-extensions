@@ -1,3 +1,5 @@
+// with love from TheShovel <3
+
 let socket = null;
 let currentServer = null;
 let connected = false;

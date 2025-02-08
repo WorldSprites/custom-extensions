@@ -1,3 +1,5 @@
+// with love from TheShovel <3
+
 let mathList = {};
 let mathResults = {};
 let tasks = [];

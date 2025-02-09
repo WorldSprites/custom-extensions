@@ -5,6 +5,7 @@ inputBox.type = "text";
 inputBox.value = "";
 inputBox.name = "inputboxext_input";
 inputBox.style = "width:0px";
+inputBox.autocomplete = "off";
 document.body.appendChild(inputBox);
 
 class inputbox {

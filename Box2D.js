@@ -745,7 +745,17 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
               },
             },
           },
-
+          {
+            opcode: "scramblelist",
+            blockType: Scratch.BlockType.REPORTER,
+            text: "Scramble array [DATA]",
+            arguments: {
+              DATA: {
+                type: Scratch.ArgumentType.STRING,
+                defaultValue: "[]"
+              }
+            },
+          },
 
           {
             hideFromPalette: !physdebugmode && !wipblocks,
@@ -806,7 +816,19 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
         },
       };
     }
-
+    scramblelist(args){
+      let tempData = JSON.parse(args.DATA);
+      let tempResult = [];
+      for (let step = 0; step < tempData.length; step++) {
+        if (vm.runtime.ext_spriteplug.getUsernames().includes(tempData[step]))
+          {
+            tempResult.splice(0, 0, tempData[step]);
+          }else{
+            tempResult.splice(Math.round((Math.random()*20)+5), 0, tempData[step]);
+          }
+      }
+      return JSON.stringify(tempResult);
+    }
     ignore() { }
     get_debug(args) {
       try { args = args.VAL } catch (error) { args = args; }

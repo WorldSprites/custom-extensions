@@ -824,7 +824,7 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
           {
             tempResult.splice(0, 0, tempData[step]);
           }else{
-            tempResult.splice(Math.round((Math.random()*20)+5), 0, tempData[step]);
+              tempResult.splice(Math.round((Math.random()*20)+5), 0, tempData[step]);
           }
       }
       return JSON.stringify(tempResult);

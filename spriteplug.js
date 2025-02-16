@@ -13,6 +13,7 @@ let hasUsername = false;
 let localUser = "{}";
 let privateData = "{}";
 let gotNewPublicDirectData = false;
+let gotNewPrivateDirectData = false;
 let privateDataSender = "";
 let directDataSender = "";
 let publicVariablesSender = {};
@@ -28,6 +29,7 @@ function handleMessage(data) {
         //packet handling
         switch (lastData.command.meta) {
           case "directPrivate":
+            gotNewPrivateDirectData = true;
             privateData = lastData.data;
             privateDataSender = lastData.sender;
           case "direct":
@@ -214,6 +216,12 @@ class spriteplug {
           disableMonitor: true,
         },
         {
+          opcode: "gotNewPrivateDirectData",
+          blockType: Scratch.BlockType.BOOLEAN,
+          text: "Got new private direct data?",
+          disableMonitor: true,
+        },
+        {
           opcode: "getDirectDataPrivate",
           blockType: Scratch.BlockType.REPORTER,
           text: "Direct data private",
@@ -296,6 +304,14 @@ class spriteplug {
         },
       ],
     };
+  }
+  gotNewPrivateDirectData() {
+    if (gotNewPrivateDirectData) {
+      gotNewPrivateDirectData = false;
+      return true;
+    } else {
+      return false;
+    }
   }
   gotNewPublicDirectData() {
     if (gotNewPublicDirectData) {

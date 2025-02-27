@@ -1261,20 +1261,22 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
       var body = bodies[args.NAME];
       let tempObject = {};
       if(noCollide[args.NAME] == 1){
-        tempObject.x = Math.round((body.GetPosition().x - 999999999) * b2Dzoom);
-        tempObject.y = Math.round((body.GetPosition().y - 999999999) * b2Dzoom);
+        tempObject.x = (body.GetPosition().x - 999999999) * b2Dzoom;
+        tempObject.y = (body.GetPosition().y - 999999999) * b2Dzoom;
       } else {
-        tempObject.x = Math.round(body.GetPosition().x * b2Dzoom);
-        tempObject.y = Math.round(body.GetPosition().y * b2Dzoom);
+        tempObject.x = body.GetPosition().x * b2Dzoom;
+        tempObject.y = body.GetPosition().y * b2Dzoom;
       }
-      tempObject.r = Math.round(90 - (body.GetAngle() / toRad));
+      tempObject.r = 90 - (body.GetAngle() / toRad);
       if (args.META == true) {
+        tempObject.co = noCollide[args.NAME] != 1;
         tempObject.m = true;
+        tempObject.p = vm.runtime.variables[args.NAME + "_P"];
+        tempObject.dy = vm.runtime.variables[args.NAME + "_DY"];
         tempObject.w = vm.runtime.variables[args.NAME + "_W"];
         tempObject.h = vm.runtime.variables[args.NAME + "_H"];
         tempObject.s = vm.runtime.variables[args.NAME + "_S"];
         tempObject.c = vm.runtime.variables[args.NAME + "_C"].toString();
-        tempObject.de = vm.runtime.variables[args.NAME + "_DE"];
       }
       if (vm.runtime.variables[args.NAME+"_S"] == "anim"){
         tempObject.xv = body.GetLinearVelocity().x;

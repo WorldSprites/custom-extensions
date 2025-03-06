@@ -1260,38 +1260,54 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
     getBodyObject(args){
       var body = bodies[args.NAME];
       let tempObject = {};
-      if(noCollide[args.NAME] == 1){
-        tempObject.x = (body.GetPosition().x - 999999999) * b2Dzoom;
-        tempObject.y = (body.GetPosition().y - 999999999) * b2Dzoom;
-      } else {
-        tempObject.x = body.GetPosition().x * b2Dzoom;
-        tempObject.y = body.GetPosition().y * b2Dzoom;
-      }
-      tempObject.r = 90 - (body.GetAngle() / toRad);
-      if (args.META == true) {
-        tempObject.co = noCollide[args.NAME] != 1;
-        tempObject.m = true;
-        tempObject.p = vm.runtime.variables[args.NAME + "_P"];
-        tempObject.dy = vm.runtime.variables[args.NAME + "_DY"];
-        tempObject.w = vm.runtime.variables[args.NAME + "_W"];
-        tempObject.h = vm.runtime.variables[args.NAME + "_H"];
-        tempObject.s = vm.runtime.variables[args.NAME + "_S"];
-        tempObject.c = vm.runtime.variables[args.NAME + "_C"].toString();
-      }
-      if (vm.runtime.variables[args.NAME+"_S"] == "anim"){
-        tempObject.xv = body.GetLinearVelocity().x;
-        tempObject.yv = body.GetLinearVelocity().y;
-        tempObject.dv = Math.round(body.GetAngularVelocity());
-        tempObject.ai = Math.round(vm.runtime.variables[args.NAME + "_AI"]);
-        if(vm.runtime.variables[args.NAME+"_AF"] == "player"){
-          tempObject.feet = vm.runtime.variables[args.NAME + "_FEET"];
+      tempObject.t = vm.runtime.variables[args.NAME + "_T"];
+      switch(tempObject.t){
+        case "sound":
+          if (args.META == true) {
+            tempObject.m = true;
+            tempObject.s = vm.runtime.variables[args.NAME + "_S"];
+            tempObject.v = vm.runtime.variables[args.NAME + "_V"];
+            tempObject.l = vm.runtime.variables[args.NAME + "_L"];
+            tempObject.lc = vm.runtime.variables[args.NAME + "_LC"];
+          }
+          tempObject.x = vm.runtime.variables[args.NAME + "_X"];
+          tempObject.y = vm.runtime.variables[args.NAME + "_Y"];
+          break;
+        case undefined:
+        if(noCollide[args.NAME] == 1){
+          tempObject.x = (body.GetPosition().x - 999999999) * b2Dzoom;
+          tempObject.y = (body.GetPosition().y - 999999999) * b2Dzoom;
+        } else {
+          tempObject.x = body.GetPosition().x * b2Dzoom;
+          tempObject.y = body.GetPosition().y * b2Dzoom;
         }
-        tempObject.d = vm.runtime.variables[args.NAME + "_D"];
-        tempObject.a = vm.runtime.variables[args.NAME + "_A"];
+        tempObject.r = 90 - (body.GetAngle() / toRad);
         if (args.META == true) {
-          tempObject.af = vm.runtime.variables[args.NAME + "_AF"];
-          tempObject.aid = vm.runtime.variables[args.NAME + "_AID"];
+          tempObject.co = noCollide[args.NAME] != 1;
+          tempObject.m = true;
+          tempObject.p = vm.runtime.variables[args.NAME + "_P"];
+          tempObject.dy = vm.runtime.variables[args.NAME + "_DY"];
+          tempObject.w = vm.runtime.variables[args.NAME + "_W"];
+          tempObject.h = vm.runtime.variables[args.NAME + "_H"];
+          tempObject.s = vm.runtime.variables[args.NAME + "_S"];
+          tempObject.c = vm.runtime.variables[args.NAME + "_C"].toString();
         }
+        if (vm.runtime.variables[args.NAME+"_S"] == "anim"){
+          tempObject.xv = body.GetLinearVelocity().x;
+          tempObject.yv = body.GetLinearVelocity().y;
+          tempObject.dv = Math.round(body.GetAngularVelocity());
+          tempObject.ai = Math.round(vm.runtime.variables[args.NAME + "_AI"]);
+          if(vm.runtime.variables[args.NAME+"_AF"] == "player"){
+            tempObject.feet = vm.runtime.variables[args.NAME + "_FEET"];
+          }
+          tempObject.d = vm.runtime.variables[args.NAME + "_D"];
+          tempObject.a = vm.runtime.variables[args.NAME + "_A"];
+          if (args.META == true) {
+            tempObject.af = vm.runtime.variables[args.NAME + "_AF"];
+            tempObject.aid = vm.runtime.variables[args.NAME + "_AID"];
+          }
+        }
+        break;
       }
       return JSON.stringify(tempObject)
     }

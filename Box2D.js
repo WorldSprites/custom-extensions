@@ -1273,6 +1273,7 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
           tempObject.x = vm.runtime.variables[args.NAME + "_X"];
           tempObject.y = vm.runtime.variables[args.NAME + "_Y"];
           break;
+        case "interact":
         case undefined:
         if(noCollide[args.NAME] == 1){
           tempObject.x = (body.GetPosition().x - 999999999) * b2Dzoom;
@@ -1297,7 +1298,7 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
           tempObject.xv = body.GetLinearVelocity().x;
           tempObject.yv = body.GetLinearVelocity().y;
           tempObject.dv = Math.round(body.GetAngularVelocity());
-          tempObject.ai = Math.round(vm.runtime.variables[args.NAME + "_AI"]);
+          tempObject.ai = vm.runtime.variables[args.NAME + "_AI"];
           if(vm.runtime.variables[args.NAME+"_AF"] == "player"){
             tempObject.feet = vm.runtime.variables[args.NAME + "_FEET"];
           }
@@ -1347,8 +1348,12 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
     moveto(args) {
       var body = bodies[args.NAME];
       if (!body) return '';
-
-      var desiredPosition = new b2Vec2(args.X / b2Dzoom, args.Y / b2Dzoom);
+      if (noCollide[args.NAME] == 1){
+        var desiredPosition = new b2Vec2(args.X / b2Dzoom + 999999999, args.Y / b2Dzoom + 999999999);
+      }
+      else{
+        var desiredPosition = new b2Vec2(args.X / b2Dzoom, args.Y / b2Dzoom);
+      }
       body.SetPosition(desiredPosition);
       body.SetAwake(true)
     }

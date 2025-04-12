@@ -1502,7 +1502,7 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
     }
 
     definePrismatic(args) {
-      var directionRadians = args.DIR - 90 * Math.PI / 180;
+      var directionRadians = (90 - args.DIR) * toRad;
       prb2djaxisX = Math.cos(directionRadians);
       prb2djaxisY = Math.sin(directionRadians);
       prb2dju = args.HIGH;

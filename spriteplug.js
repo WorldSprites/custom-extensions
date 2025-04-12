@@ -1,5 +1,11 @@
 // with love from TheShovel <3
 
+let packetBatchTimeout = null;
+let packetBatch = [];
+const BATCH_DELAY = 16; // ~60fps batching rate
+let publicPacketQueue = [];
+let privatePacketQueue = [];
+let MAX_QUEUE_SIZE = 100;
 let socket = null;
 let currentServer = null;
 let connected = false;
@@ -19,30 +25,94 @@ let directDataSender = "";
 let publicVariablesSender = {};
 let privateVariablesSender = {};
 
+function queuePacket(packet) {
+  packetBatch.push(packet);
+
+  // Clear existing timeout
+  if (packetBatchTimeout) {
+    clearTimeout(packetBatchTimeout);
+  }
+
+  // Schedule new batch send
+  packetBatchTimeout = setTimeout(sendBatch, BATCH_DELAY);
+}
+
+async function sendBatch() {
+  if (packetBatch.length === 0) return;
+
+  const batch = packetBatch;
+  packetBatch = [];
+  // Send all packets in batch as one message
+  socket.send(
+    JSON.stringify({
+      command: {
+        type: "packet",
+        meta: "batch",
+      },
+      targets: true,
+      data: batch,
+      id: Date.now(),
+    }),
+  );
+}
+
+function handlePacket(packet) {
+  switch (packet.command.meta) {
+    case "directPrivate":
+      privatePacketQueue.push({
+        data: packet.data,
+        sender: packet.sender,
+      });
+      if (privatePacketQueue.length > MAX_QUEUE_SIZE) {
+        privatePacketQueue.shift();
+      }
+      gotNewPrivateDirectData = true;
+      privateData = packet.data;
+      privateDataSender = packet.sender;
+      break;
+    case "direct":
+      publicPacketQueue.push({
+        data: packet.data,
+        sender: packet.sender,
+      });
+      if (publicPacketQueue.length > MAX_QUEUE_SIZE) {
+        publicPacketQueue.shift();
+      }
+      gotNewPublicDirectData = true;
+      directData = packet.data;
+      directDataSender = packet.sender;
+      break;
+    case "privVar":
+      privateVariables[packet.data.var] = packet.data.val;
+      privateVariablesSender[packet.data.var] = packet.sender;
+      break;
+    case "pubVar":
+      publicVariables[packet.data.var] = packet.data.val;
+      publicVariablesSender[packet.data.var] = packet.sender;
+      break;
+    case "batch":
+      if (Array.isArray(packet.data)) {
+        packet.data.forEach((packetBatch) => {
+          if (packetBatch && packetBatch.command) {
+            packetBatch.sender = packet.sender;
+            handlePacket(packetBatch);
+          }
+        });
+      }
+      break;
+  }
+}
+
 function handleMessage(data) {
   lastData = JSON.parse(data);
   if (lastData.status == undefined) {
     switch (lastData.command.type) {
       case "userlist":
         userList = JSON.stringify(lastData.data);
+        break;
       case "packet":
-        //packet handling
-        switch (lastData.command.meta) {
-          case "directPrivate":
-            gotNewPrivateDirectData = true;
-            privateData = lastData.data;
-            privateDataSender = lastData.sender;
-          case "direct":
-            gotNewPublicDirectData = true;
-            directData = lastData.data;
-            directDataSender = lastData.sender;
-          case "privVar":
-            privateVariables[lastData.data.var] = lastData.data.val;
-            privateVariablesSender[lastData.data.var] = lastData.sender;
-          case "pubVar":
-            publicVariables[lastData.data.var] = lastData.data.val;
-            publicVariablesSender[lastData.data.var] = lastData.sender;
-        }
+        handlePacket(lastData);
+        break;
     }
   } else {
     switch (lastData.type) {
@@ -52,6 +122,7 @@ function handleMessage(data) {
             hasUsername = true;
             localUser = JSON.stringify(lastData.data);
         }
+        break;
       case "validate":
         switch (lastData.originType) {
           case "room":
@@ -69,10 +140,13 @@ function handleMessage(data) {
               }),
             );
         }
+        break;
     }
   }
 }
 function resetClient() {
+  publicPacketQueue = [];
+  privatePacketQueue = [];
   lastData = {};
   socket = null;
   currentServer = null;
@@ -267,6 +341,42 @@ class spriteplug {
         },
         "---",
         {
+          opcode: "setMaxQueueSize",
+          blockType: Scratch.BlockType.COMMAND,
+          text: "Set max queue size to [size]",
+          arguments: {
+            size: {
+              type: Scratch.ArgumentType.NUMBER,
+              defaultValue: 100,
+            },
+          },
+        },
+        {
+          opcode: "getNextPublicPacket",
+          blockType: Scratch.BlockType.REPORTER,
+          text: "Get next public packet",
+          disableMonitor: true,
+        },
+        {
+          opcode: "getNextPrivatePacket",
+          blockType: Scratch.BlockType.REPORTER,
+          text: "Get next private packet",
+          disableMonitor: true,
+        },
+        {
+          opcode: "getPublicQueueLength",
+          blockType: Scratch.BlockType.REPORTER,
+          text: "Public packet queue length",
+          disableMonitor: true,
+        },
+        {
+          opcode: "getPrivateQueueLength",
+          blockType: Scratch.BlockType.REPORTER,
+          text: "Private packet queue length",
+          disableMonitor: true,
+        },
+        "---",
+        {
           opcode: "sendPacket",
           blockType: Scratch.BlockType.COMMAND,
           text: "Send direct [data]",
@@ -304,6 +414,39 @@ class spriteplug {
         },
       ],
     };
+  }
+  setMaxQueueSize(args) {
+    const newSize = Math.max(1, Math.floor(Number(args.size)));
+    MAX_QUEUE_SIZE = newSize;
+    while (publicPacketQueue.length > MAX_QUEUE_SIZE) {
+      publicPacketQueue.shift();
+    }
+    while (privatePacketQueue.length > MAX_QUEUE_SIZE) {
+      privatePacketQueue.shift();
+    }
+  }
+  getNextPublicPacket() {
+    if (publicPacketQueue.length > 0) {
+      const packet = publicPacketQueue.shift();
+      return packet.data;
+    }
+    return "";
+  }
+
+  getNextPrivatePacket() {
+    if (privatePacketQueue.length > 0) {
+      const packet = privatePacketQueue.shift();
+      return packet.data;
+    }
+    return "";
+  }
+
+  getPublicQueueLength() {
+    return publicPacketQueue.length;
+  }
+
+  getPrivateQueueLength() {
+    return privatePacketQueue.length;
   }
   gotNewPrivateDirectData() {
     if (gotNewPrivateDirectData) {
@@ -422,30 +565,26 @@ class spriteplug {
     resetClient();
   }
   sendPacketPrivate(args) {
-    socket.send(
-      JSON.stringify({
-        command: {
-          type: "packet",
-          meta: "directPrivate",
-        },
-        targets: [args.id],
-        data: args.data,
-        id: Date.now(),
-      }),
-    );
+    queuePacket({
+      command: {
+        type: "packet",
+        meta: "directPrivate",
+      },
+      targets: [args.id],
+      data: args.data,
+      id: Date.now(),
+    });
   }
   sendPacket(args) {
-    socket.send(
-      JSON.stringify({
-        command: {
-          type: "packet",
-          meta: "direct",
-        },
-        targets: true,
-        data: args.data,
-        id: Date.now(),
-      }),
-    );
+    queuePacket({
+      command: {
+        type: "packet",
+        meta: "direct",
+      },
+      targets: true,
+      data: args.data,
+      id: Date.now(),
+    });
   }
   setUsername(args) {
     socket.send(

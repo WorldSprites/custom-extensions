@@ -1286,6 +1286,7 @@ for ScratchX by Griffpatch, but has since deviated to have more features.
         if (args.META == true) {
           tempObject.co = noCollide[args.NAME] != 1;
           tempObject.m = true;
+          tempObject.noo = vm.runtime.variables[args.NAME + "_NOO"];
           tempObject.o = vm.runtime.variables[args.NAME + "_O"];
           tempObject.p = vm.runtime.variables[args.NAME + "_P"];
           tempObject.dy = vm.runtime.variables[args.NAME + "_DY"];
